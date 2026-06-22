@@ -174,19 +174,249 @@ function generateWeekData() {
   return week;
 }
 
-// ==================== 初始化（临时验证） ====================
+// ==================== 状态 ====================
+
+var state = {
+  currentDay: 6,
+  selectedMetrics: {
+    vehicle: 'totalVehicles',
+    ops: 'swapComplete',
+    order: 'lostOrders'
+  }
+};
+
+var weekData = [];
+var weekDates = [];
+var vehicleChart = null;
+var orderChart = null;
+
+// ==================== 渲染：周选择器 ====================
+
+function renderWeekSelector() {
+  var container = document.getElementById('weekSelector');
+  var html = '';
+  for (var i = 0; i < weekDates.length; i++) {
+    var d = weekDates[i];
+    var cls = i === state.currentDay ? 'day-tab active' : 'day-tab';
+    html += '<div class="' + cls + '" data-day="' + i + '">'
+      + '<span class="day-label">' + d.label + '</span>'
+      + '<span class="day-date">' + d.date + '</span>'
+      + '</div>';
+  }
+  html += '<div class="calendar-btn">日历</div>';
+  container.innerHTML = html;
+}
+
+// ==================== 渲染：营收数据 ====================
+
+function renderChangeText(value) {
+  if (value > 0) return '<span class="metric-change positive">环比 +' + value + ' %</span>';
+  if (value < 0) return '<span class="metric-change negative">环比 ' + value + ' %</span>';
+  return '<span class="metric-change">环比 0 %</span>';
+}
+
+function renderRevenue(data) {
+  document.getElementById('val-revenue').textContent = formatNumber(data.revenue);
+  document.getElementById('val-storedRevenue').textContent = formatNumber(data.storedRevenue);
+  document.getElementById('val-adRevenue').textContent = formatNumber(data.adRevenue);
+  document.getElementById('val-orderCount').textContent = formatNumber(data.orderCount);
+
+  document.getElementById('change-revenue').innerHTML = renderChangeText(data.revenueChange);
+  document.getElementById('change-storedRevenue').innerHTML = renderChangeText(data.storedRevenueChange);
+  document.getElementById('change-adRevenue').innerHTML = renderChangeText(data.adRevenueChange);
+  document.getElementById('change-orderCount').innerHTML = renderChangeText(data.orderCountChange);
+}
+
+// ==================== 渲染：车辆数据 ====================
+
+function renderVehicleMetrics(data) {
+  document.getElementById('val-totalVehicles').textContent = formatNumber(data.totalVehicles);
+  document.getElementById('val-unavailableVehicles').textContent = formatNumber(data.unavailableVehicles);
+  document.getElementById('val-noOrderVehicles').textContent = formatNumber(data.noOrderVehicles);
+}
+
+// ==================== 渲染：运维数据 ====================
+
+function renderOpsMetrics(data) {
+  document.getElementById('val-swapComplete').textContent = formatNumber(data.swapComplete);
+  document.getElementById('val-dispatchVehicles').textContent = formatNumber(data.dispatchVehicles);
+  document.getElementById('val-dispatchRate').innerHTML = data.dispatchRate.toFixed(2) + '<span class="unit">%</span>';
+  document.getElementById('val-repairOrders').textContent = formatNumber(data.repairOrders);
+  document.getElementById('val-repairComplete').textContent = formatNumber(data.repairComplete);
+  document.getElementById('val-lowBatteryVehicles').textContent = formatNumber(data.lowBatteryVehicles);
+}
+
+// ==================== 渲染：订单数据 ====================
+
+function renderOrderMetrics(data) {
+  document.getElementById('val-avgPrice').textContent = data.avgPrice.toFixed(2);
+  document.getElementById('val-avgDuration').textContent = data.avgDuration;
+  document.getElementById('val-lostOrders').textContent = formatNumber(data.lostOrders);
+}
+
+// ==================== 渲染：明细区域 ====================
+
+function renderPlaceholder() {
+  return '<div class="detail-placeholder">明细开发中</div>';
+}
+
+function renderVehicleChartHTML(data) {
+  return '<div class="donut-wrapper">'
+    + '<div class="donut-container"><canvas id="vehicleCanvas"></canvas>'
+    + '<div class="donut-center"><div class="donut-center-label">运营车辆数</div>'
+    + '<div class="donut-center-value">' + formatNumber(data.totalVehicles) + '</div></div></div>'
+    + '<div class="donut-legend">'
+    + '<div class="legend-item"><span class="legend-dot" style="background:#3478F6"></span>'
+    + '<span>可用车辆数</span><span class="legend-num">' + formatNumber(data.availableVehicles) + '</span></div>'
+    + '<div class="legend-item"><span class="legend-dot" style="background:#E0E0E0"></span>'
+    + '<span>不可用车辆</span><span class="legend-num">' + formatNumber(data.unavailableVehicles) + '</span></div>'
+    + '</div></div>';
+}
+
+function renderStaffTableHTML(data) {
+  var rows = '';
+  for (var i = 0; i < data.staff.length; i++) {
+    var s = data.staff[i];
+    var rankCls = i === 0 ? 'rank rank-1' : 'rank';
+    rows += '<div class="table-row">'
+      + '<span class="col-rank"><em class="' + rankCls + '">' + (i + 1) + '</em></span>'
+      + '<span class="col-name">' + s.name + '</span>'
+      + '<span class="col-num">' + s.swapCount + '</span>'
+      + '<span class="col-num">' + s.swapSuccess + '</span>'
+      + '<span class="col-num">' + s.score + '</span>'
+      + '</div>';
+  }
+  return '<div class="staff-table">'
+    + '<div class="table-header">'
+    + '<span class="col-rank">姓名</span><span class="col-name"></span>'
+    + '<span class="col-num">换电次数</span><span class="col-num">换电成功</span><span class="col-num">绩效</span>'
+    + '</div>'
+    + rows
+    + '<div class="table-footer">'
+    + '<span>换电次数:' + formatNumber(data.staffTotals.swapCount) + '</span>'
+    + '<span>换电成功:' + formatNumber(data.staffTotals.swapSuccess) + '</span>'
+    + '<span>绩效:' + formatNumber(data.staffTotals.score) + '</span>'
+    + '</div></div>';
+}
+
+function renderOrderChartHTML(data) {
+  return '<div class="donut-wrapper vertical">'
+    + '<div class="donut-container"><canvas id="orderCanvas"></canvas>'
+    + '<div class="donut-center"><div class="donut-center-label">丢单次数</div>'
+    + '<div class="donut-center-value">' + formatNumber(data.lostOrders) + '</div></div></div>'
+    + '<div class="donut-legend horizontal">'
+    + '<div class="legend-item"><span class="legend-dot" style="background:#E8C547"></span>'
+    + '<span>超区丢单</span><span class="legend-num">' + formatNumber(data.lostOutOfRange) + '</span></div>'
+    + '<div class="legend-item"><span class="legend-dot" style="background:#3D8B8B"></span>'
+    + '<span>低电丢单</span><span class="legend-num">' + formatNumber(data.lostLowBattery) + '</span></div>'
+    + '<div class="legend-item"><span class="legend-dot" style="background:#BDBDBD"></span>'
+    + '<span>故障丢单</span><span class="legend-num">' + formatNumber(data.lostFault) + '</span></div>'
+    + '<div class="legend-item"><span class="legend-dot" style="background:#81C784"></span>'
+    + '<span>其他原因丢单</span><span class="legend-num">' + formatNumber(data.lostOther) + '</span></div>'
+    + '</div></div>';
+}
+
+function renderDetails(data) {
+  var vehicleEl = document.getElementById('vehicleDetail');
+  var opsEl = document.getElementById('opsDetail');
+  var orderEl = document.getElementById('orderDetail');
+
+  if (vehicleChart) { vehicleChart.destroy(); vehicleChart = null; }
+  if (orderChart) { orderChart.destroy(); orderChart = null; }
+
+  if (state.selectedMetrics.vehicle === 'totalVehicles') {
+    vehicleEl.innerHTML = renderVehicleChartHTML(data);
+    initVehicleChart(data);
+  } else {
+    vehicleEl.innerHTML = renderPlaceholder();
+  }
+
+  if (state.selectedMetrics.ops === 'swapComplete') {
+    opsEl.innerHTML = renderStaffTableHTML(data);
+  } else {
+    opsEl.innerHTML = renderPlaceholder();
+  }
+
+  if (state.selectedMetrics.order === 'lostOrders') {
+    orderEl.innerHTML = renderOrderChartHTML(data);
+    initOrderChart(data);
+  } else {
+    orderEl.innerHTML = renderPlaceholder();
+  }
+}
+
+// ==================== 图表（Task 4 实现） ====================
+
+function initVehicleChart(data) {
+  // Chart.js initialization — implemented in Task 4
+}
+
+function initOrderChart(data) {
+  // Chart.js initialization — implemented in Task 4
+}
+
+// ==================== 选中态 ====================
+
+function updateSelectionUI() {
+  var selectables = document.querySelectorAll('.metric-item.selectable');
+  for (var i = 0; i < selectables.length; i++) {
+    var el = selectables[i];
+    var card = el.getAttribute('data-card');
+    var metric = el.getAttribute('data-metric');
+    if (state.selectedMetrics[card] === metric) {
+      el.classList.add('selected');
+    } else {
+      el.classList.remove('selected');
+    }
+  }
+}
+
+// ==================== 整页渲染 ====================
+
+function renderPage(data) {
+  renderRevenue(data);
+  renderVehicleMetrics(data);
+  renderOpsMetrics(data);
+  renderOrderMetrics(data);
+  renderDetails(data);
+  updateSelectionUI();
+}
+
+// ==================== 事件绑定 ====================
+
+function setupEvents() {
+  document.getElementById('weekSelector').addEventListener('click', function (e) {
+    var tab = e.target.closest('.day-tab');
+    if (!tab) return;
+    var dayIndex = parseInt(tab.getAttribute('data-day'), 10);
+    if (isNaN(dayIndex)) return;
+    state.currentDay = dayIndex;
+    renderWeekSelector();
+    renderPage(weekData[state.currentDay]);
+  });
+
+  document.addEventListener('click', function (e) {
+    var item = e.target.closest('.metric-item.selectable');
+    if (!item) return;
+    var card = item.getAttribute('data-card');
+    var metric = item.getAttribute('data-metric');
+    if (!card || !metric) return;
+    state.selectedMetrics[card] = metric;
+    renderDetails(weekData[state.currentDay]);
+    updateSelectionUI();
+  });
+}
+
+// ==================== 初始化 ====================
 
 document.addEventListener('DOMContentLoaded', function () {
-  var weekData = generateWeekData();
-  console.log('Day 0 data:', weekData[0]);
-  console.log('Day 0 totalVehicles:', weekData[0].totalVehicles,
-    '= available', weekData[0].availableVehicles, '+ unavailable', weekData[0].unavailableVehicles);
-  console.log('Day 0 lostOrders:', weekData[0].lostOrders,
-    '= outOfRange', weekData[0].lostOutOfRange, '+ lowBattery', weekData[0].lostLowBattery,
-    '+ fault', weekData[0].lostFault, '+ other', weekData[0].lostOther);
-  console.log('Day 0 staff[0] success <= count:',
-    weekData[0].staff[0].swapSuccess <= weekData[0].staff[0].swapCount);
-  console.log('Day 0 repairComplete <= repairOrders:',
-    weekData[0].repairComplete <= weekData[0].repairOrders);
-  console.log('Week dates:', getWeekDates());
+  weekDates = getWeekDates();
+  weekData = generateWeekData();
+
+  var yesterdayIndex = weekDates.findIndex(function (d) { return d.isYesterday; });
+  if (yesterdayIndex >= 0) state.currentDay = yesterdayIndex;
+
+  renderWeekSelector();
+  renderPage(weekData[state.currentDay]);
+  setupEvents();
 });
