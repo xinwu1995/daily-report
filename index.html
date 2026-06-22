@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>日报看板</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="header-top">
+      <div class="city-selector">
+        <span class="city-name">南宁市</span>
+        <span class="dropdown-arrow">&#8964;</span>
+      </div>
+      <button class="settings-btn" aria-label="设置">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="weather-info">多云转晴 温度22~32℃</div>
+  </header>
+
+  <nav class="week-selector" id="weekSelector"></nav>
+
+  <main class="content">
+
+    <section class="card">
+      <div class="card-title">营收数据 <span class="info-icon">&#9737;</span></div>
+      <div class="metrics-grid cols-3">
+        <div class="metric-item">
+          <div class="metric-label">实收订单金额</div>
+          <div class="metric-value large" id="val-revenue">-</div>
+          <div class="metric-change" id="change-revenue"></div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-label clickable">储值营收 &gt;</div>
+          <div class="metric-value large" id="val-storedRevenue">-</div>
+          <div class="metric-change" id="change-storedRevenue"></div>
+        </div>
+        <div class="metric-item">
+          <div class="metric-label">广告营收</div>
+          <div class="metric-value large" id="val-adRevenue">-</div>
+          <div class="metric-change" id="change-adRevenue"></div>
+        </div>
+      </div>
+      <div class="metrics-grid cols-3 mt-sm">
+        <div class="metric-item">
+          <div class="metric-label">实收订单量</div>
+          <div class="metric-value large" id="val-orderCount">-</div>
+          <div class="metric-change" id="change-orderCount"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">车辆数据 <span class="info-icon">&#9737;</span></div>
+      <div class="metrics-grid cols-3">
+        <div class="metric-item selectable selected" data-card="vehicle" data-metric="totalVehicles">
+          <div class="metric-label">运营车辆数</div>
+          <div class="metric-value" id="val-totalVehicles">-</div>
+        </div>
+        <div class="metric-item selectable" data-card="vehicle" data-metric="unavailableVehicles">
+          <div class="metric-label">不可用车辆数</div>
+          <div class="metric-value" id="val-unavailableVehicles">-</div>
+        </div>
+        <div class="metric-item selectable" data-card="vehicle" data-metric="noOrderVehicles">
+          <div class="metric-label">未产生订单车辆(3天)</div>
+          <div class="metric-value" id="val-noOrderVehicles">-</div>
+        </div>
+      </div>
+      <div class="detail-area" id="vehicleDetail"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">运维数据 <span class="info-icon">&#9737;</span></div>
+      <div class="metrics-grid cols-3">
+        <div class="metric-item selectable selected" data-card="ops" data-metric="swapComplete">
+          <div class="metric-label">换电任务完成数</div>
+          <div class="metric-value" id="val-swapComplete">-</div>
+        </div>
+        <div class="metric-item selectable" data-card="ops" data-metric="dispatchVehicles">
+          <div class="metric-label">调度车辆数量</div>
+          <div class="metric-value" id="val-dispatchVehicles">-</div>
+        </div>
+        <div class="metric-item selectable" data-card="ops" data-metric="dispatchRate">
+          <div class="metric-label">12小时调度成单率</div>
+          <div class="metric-value" id="val-dispatchRate">-</div>
+        </div>
+      </div>
+      <div class="metrics-grid cols-3 mt-sm">
+        <div class="metric-item selectable" data-card="ops" data-metric="repairOrders">
+          <div class="metric-label">报修单数</div>
+          <div class="metric-value" id="val-repairOrders">-</div>
+        </div>
+        <div class="metric-item selectable" data-card="ops" data-metric="repairComplete">
+          <div class="metric-label">报修完成数</div>
+          <div class="metric-value" id="val-repairComplete">-</div>
+        </div>
+        <div class="metric-item selectable" data-card="ops" data-metric="lowBatteryVehicles">
+          <div class="metric-label">低电车辆数</div>
+          <div class="metric-value" id="val-lowBatteryVehicles">-</div>
+        </div>
+      </div>
+      <div class="detail-area" id="opsDetail"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-title">订单数据 <span class="info-icon">&#9737;</span></div>
+      <div class="metrics-grid cols-3">
+        <div class="metric-item selectable" data-card="order" data-metric="avgPrice">
+          <div class="metric-label">均单价</div>
+          <div class="metric-value large" id="val-avgPrice">-</div>
+        </div>
+        <div class="metric-item selectable" data-card="order" data-metric="avgDuration">
+          <div class="metric-label">均单时长</div>
+          <div class="metric-value large" id="val-avgDuration">-</div>
+        </div>
+        <div class="metric-item selectable selected" data-card="order" data-metric="lostOrders">
+          <div class="metric-label">丢单次数</div>
+          <div class="metric-value large" id="val-lostOrders">-</div>
+        </div>
+      </div>
+      <div class="detail-area" id="orderDetail"></div>
+    </section>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
+  <script src="app.js"></script>
+</body>
+</html>
