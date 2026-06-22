@@ -348,11 +348,55 @@ function renderDetails(data) {
 // ==================== 图表（Task 4 实现） ====================
 
 function initVehicleChart(data) {
-  // Chart.js initialization — implemented in Task 4
+  var canvas = document.getElementById('vehicleCanvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  vehicleChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: [data.availableVehicles, data.unavailableVehicles],
+        backgroundColor: ['#3478F6', '#E0E0E0'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      cutout: '62%',
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false }
+      },
+      animation: { duration: 400 }
+    }
+  });
 }
 
 function initOrderChart(data) {
-  // Chart.js initialization — implemented in Task 4
+  var canvas = document.getElementById('orderCanvas');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  orderChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: [data.lostOutOfRange, data.lostLowBattery, data.lostFault, data.lostOther],
+        backgroundColor: ['#E8C547', '#3D8B8B', '#BDBDBD', '#81C784'],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      cutout: '55%',
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false }
+      },
+      animation: { duration: 400 }
+    }
+  });
 }
 
 // ==================== 选中态 ====================
