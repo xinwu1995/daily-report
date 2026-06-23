@@ -1352,13 +1352,9 @@ function onDragStart(e) {
   });
 
   var clone = item.cloneNode(true);
-  clone.classList.add('dragging');
-  clone.style.position = 'fixed';
-  clone.style.left = rect.left + 'px';
-  clone.style.top = rect.top + 'px';
-  clone.style.width = rect.width + 'px';
-  clone.style.zIndex = '1000';
-  clone.style.pointerEvents = 'none';
+  clone.style.cssText = 'position:fixed;left:' + rect.left + 'px;top:' + rect.top + 'px;width:' + rect.width + 'px;height:' + rect.height + 'px;z-index:1000;pointer-events:none;'
+    + 'display:flex;align-items:center;gap:12px;padding:14px 16px;'
+    + 'background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.15);font-family:inherit;';
   document.body.appendChild(clone);
   dragState.clone = clone;
 
@@ -1661,14 +1657,10 @@ function onModuleDragStart(e) {
   });
 
   var clone = item.cloneNode(true);
-  clone.classList.add('dragging');
-  clone.style.position = 'fixed';
-  clone.style.left = rect.left + 'px';
-  clone.style.top = rect.top + 'px';
-  clone.style.width = rect.width + 'px';
-  clone.style.zIndex = '1000';
-  clone.style.pointerEvents = 'none';
-  clone.style.boxShadow = '0 4px 16px rgba(0,0,0,0.12)';
+  clone.style.cssText = 'position:fixed;left:' + rect.left + 'px;top:' + rect.top + 'px;width:' + rect.width + 'px;height:' + rect.height + 'px;z-index:1000;pointer-events:none;'
+    + 'display:flex;align-items:center;gap:14px;padding:16px;border-radius:12px;'
+    + 'background:rgba(255,107,53,0.04);border:1.5px solid #ff6b35;'
+    + 'box-shadow:0 8px 24px rgba(0,0,0,0.15);font-family:inherit;';
   document.body.appendChild(clone);
   moduleDragState.clone = clone;
 
