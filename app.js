@@ -1352,10 +1352,16 @@ function onDragStart(e) {
   });
 
   var clone = item.cloneNode(true);
-  clone.style.cssText = 'position:fixed;left:' + rect.left + 'px;top:' + rect.top + 'px;width:' + rect.width + 'px;height:' + rect.height + 'px;z-index:1000;pointer-events:none;'
-    + 'display:flex;align-items:center;gap:12px;padding:14px 16px;'
-    + 'background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.15);font-family:inherit;';
-  document.body.appendChild(clone);
+  clone.style.position = 'fixed';
+  clone.style.left = rect.left + 'px';
+  clone.style.top = rect.top + 'px';
+  clone.style.width = rect.width + 'px';
+  clone.style.height = rect.height + 'px';
+  clone.style.zIndex = '1000';
+  clone.style.pointerEvents = 'none';
+  clone.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)';
+  clone.style.margin = '0';
+  document.getElementById('editorList').appendChild(clone);
   dragState.clone = clone;
 
   item.style.opacity = '0.2';
@@ -1657,11 +1663,16 @@ function onModuleDragStart(e) {
   });
 
   var clone = item.cloneNode(true);
-  clone.style.cssText = 'position:fixed;left:' + rect.left + 'px;top:' + rect.top + 'px;width:' + rect.width + 'px;height:' + rect.height + 'px;z-index:1000;pointer-events:none;'
-    + 'display:flex;align-items:center;gap:14px;padding:16px;border-radius:12px;'
-    + 'background:rgba(255,107,53,0.04);border:1.5px solid #ff6b35;'
-    + 'box-shadow:0 8px 24px rgba(0,0,0,0.15);font-family:inherit;';
-  document.body.appendChild(clone);
+  clone.style.position = 'fixed';
+  clone.style.left = rect.left + 'px';
+  clone.style.top = rect.top + 'px';
+  clone.style.width = rect.width + 'px';
+  clone.style.height = rect.height + 'px';
+  clone.style.zIndex = '1000';
+  clone.style.pointerEvents = 'none';
+  clone.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)';
+  clone.style.margin = '0';
+  document.querySelector('.module-picker-panel').appendChild(clone);
   moduleDragState.clone = clone;
 
   item.style.opacity = '0.2';
