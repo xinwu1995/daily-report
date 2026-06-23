@@ -1351,17 +1351,19 @@ function onDragStart(e) {
     dragState.itemPositions.push(el.getBoundingClientRect());
   });
 
-  var clone = item.cloneNode(true);
-  clone.style.position = 'fixed';
-  clone.style.left = rect.left + 'px';
-  clone.style.top = rect.top + 'px';
-  clone.style.width = rect.width + 'px';
-  clone.style.height = rect.height + 'px';
-  clone.style.zIndex = '1000';
-  clone.style.pointerEvents = 'none';
-  clone.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)';
-  clone.style.margin = '0';
-  document.getElementById('editorList').appendChild(clone);
+  var edItem = editorState.items[idx];
+  var checkSvg = edItem.checked
+    ? '<svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="#ff6b35" stroke="none"/><path d="M6 11l3.5 3.5L16 8" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    : '<svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="none" stroke="#d1d5db" stroke-width="1.5"/></svg>';
+  var clone = document.createElement('div');
+  clone.innerHTML = '<div style="flex-shrink:0;width:22px;height:22px;display:flex;align-items:center;justify-content:center">' + checkSvg + '</div>'
+    + '<span style="flex:1;font-size:15px;color:' + (edItem.checked ? '#1f2937' : '#9ca3af') + '">' + edItem.label + '</span>'
+    + '<div style="flex-shrink:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:#9ca3af">'
+    + '<svg width="14" height="10" viewBox="0 0 14 10" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="0" y1="1" x2="14" y2="1"/><line x1="0" y1="5" x2="14" y2="5"/><line x1="0" y1="9" x2="14" y2="9"/></svg></div>';
+  clone.style.cssText = 'position:fixed;left:' + rect.left + 'px;top:' + rect.top + 'px;width:' + rect.width + 'px;height:' + rect.height + 'px;z-index:9999;pointer-events:none;'
+    + 'display:flex;align-items:center;gap:12px;padding:14px 16px;box-sizing:border-box;'
+    + 'background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,0.15);font-family:-apple-system,BlinkMacSystemFont,sans-serif;';
+  document.body.appendChild(clone);
   dragState.clone = clone;
 
   item.style.opacity = '0.2';
@@ -1662,17 +1664,21 @@ function onModuleDragStart(e) {
     moduleDragState.itemPositions.push(el.getBoundingClientRect());
   });
 
-  var clone = item.cloneNode(true);
-  clone.style.position = 'fixed';
-  clone.style.left = rect.left + 'px';
-  clone.style.top = rect.top + 'px';
-  clone.style.width = rect.width + 'px';
-  clone.style.height = rect.height + 'px';
-  clone.style.zIndex = '1000';
-  clone.style.pointerEvents = 'none';
-  clone.style.boxShadow = '0 8px 24px rgba(0,0,0,0.15)';
-  clone.style.margin = '0';
-  document.querySelector('.module-picker-panel').appendChild(clone);
+  var m = modulePickerState[idx];
+  var clone = document.createElement('div');
+  clone.innerHTML = '<div style="flex-shrink:0;width:22px;height:22px;display:flex;align-items:center;justify-content:center">'
+    + (m.checked
+      ? '<svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="#ff6b35" stroke="none"/><path d="M6 11l3.5 3.5L16 8" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+      : '<svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="none" stroke="#d1d5db" stroke-width="1.5"/></svg>')
+    + '</div>'
+    + '<div style="flex:1;min-width:0"><div style="font-size:15px;font-weight:600;color:#1f2937">' + m.name + '</div>'
+    + '<div style="font-size:12px;color:#9ca3af;margin-top:2px">' + m.desc + '</div></div>'
+    + '<div style="flex-shrink:0;width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:#9ca3af">'
+    + '<svg width="18" height="14" viewBox="0 0 18 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="1" y1="1" x2="17" y2="1"/><line x1="1" y1="7" x2="17" y2="7"/><line x1="1" y1="13" x2="17" y2="13"/></svg></div>';
+  clone.style.cssText = 'position:fixed;left:' + rect.left + 'px;top:' + rect.top + 'px;width:' + rect.width + 'px;height:' + rect.height + 'px;z-index:9999;pointer-events:none;'
+    + 'display:flex;align-items:center;gap:14px;padding:16px;border-radius:12px;box-sizing:border-box;'
+    + 'background:#fff5f0;border:1.5px solid #ff6b35;box-shadow:0 8px 24px rgba(0,0,0,0.15);font-family:-apple-system,BlinkMacSystemFont,sans-serif;';
+  document.body.appendChild(clone);
   moduleDragState.clone = clone;
 
   item.style.opacity = '0.2';
