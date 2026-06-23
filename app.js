@@ -1981,6 +1981,12 @@ function setupEvents() {
 function enterDashboard() {
   document.getElementById('landingPage').style.display = 'none';
   document.getElementById('dashboardPage').style.display = '';
+  var active = document.querySelector('#weekSelector .day-tab.active');
+  if (active) {
+    setTimeout(function() {
+      active.scrollIntoView({ inline: 'center', block: 'nearest' });
+    }, 50);
+  }
 }
 
 function saveDefaultModuleSettings() {
