@@ -1224,16 +1224,16 @@ function renderCardFields(cardKey) {
         + '<div class="metric-label">' + f.label + '</div>'
         + '<div class="metric-value' + isLarge + '" id="val-' + f.key + '">-</div>'
         + '</div>';
-    } else if (cardKey === 'user') {
+    } else if (cardKey === 'revenue') {
       html += '<div class="metric-item">'
         + '<div class="metric-label">' + f.label + '</div>'
         + '<div class="metric-value large" id="val-' + f.key + '">-</div>'
+        + '<div class="metric-change" id="change-' + f.key + '"></div>'
         + '</div>';
     } else {
       html += '<div class="metric-item">'
         + '<div class="metric-label">' + f.label + '</div>'
         + '<div class="metric-value large" id="val-' + f.key + '">-</div>'
-        + '<div class="metric-change" id="change-' + f.key + '"></div>'
         + '</div>';
     }
   }
