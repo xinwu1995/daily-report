@@ -894,8 +894,8 @@ body {
   border-radius: var(--radius);
   margin-bottom: 10px;
   cursor: pointer;
-  transition: border-color 0.2s;
   border: 1.5px solid transparent;
+  touch-action: manipulation;
 }
 
 .module-picker-item.checked {
