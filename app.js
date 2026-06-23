@@ -1968,17 +1968,6 @@ function setupEvents() {
     updateSelectionUI();
   });
 
-  var lastScrollY = 0;
-  var weekEl = document.getElementById('weekSelector');
-  window.addEventListener('scroll', function() {
-    var currentY = window.scrollY;
-    if (currentY > lastScrollY && currentY > 60) {
-      weekEl.classList.add('collapsed');
-    } else {
-      weekEl.classList.remove('collapsed');
-    }
-    lastScrollY = currentY;
-  }, { passive: true });
 }
 
 // ==================== 初始化 ====================
