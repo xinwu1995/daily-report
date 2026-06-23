@@ -8,10 +8,17 @@
 </head>
 <body>
 
+  <div id="landingPage" class="landing-page">
+    <img src="landing-bg.png" class="landing-img" alt="运维模块">
+    <div id="landingDailyReport" class="landing-hotspot"></div>
+  </div>
+
+  <div id="dashboardPage" style="display:none">
+
   <header class="header">
     <div class="header-top">
       <div class="city-selector">
-        <span class="city-name">南宁市</span>
+        <span class="city-name">全部</span>
         <span class="dropdown-arrow">&#8964;</span>
       </div>
       <button class="settings-btn" aria-label="设置">
@@ -24,110 +31,86 @@
     <div class="weather-info">多云转晴 温度22~32℃</div>
   </header>
 
+  <div class="area-overlay" id="areaOverlay"></div>
+  <div class="area-picker" id="areaPicker"></div>
+
   <nav class="week-selector" id="weekSelector"></nav>
 
   <main class="content">
 
-    <section class="card">
-      <div class="card-title">营收数据 <span class="info-icon">&#9737;</span></div>
-      <div class="metrics-grid cols-3">
-        <div class="metric-item">
-          <div class="metric-label">实收订单金额</div>
-          <div class="metric-value large" id="val-revenue">-</div>
-          <div class="metric-change" id="change-revenue"></div>
-        </div>
-        <div class="metric-item">
-          <div class="metric-label clickable">储值营收 &gt;</div>
-          <div class="metric-value large" id="val-storedRevenue">-</div>
-          <div class="metric-change" id="change-storedRevenue"></div>
-        </div>
-        <div class="metric-item">
-          <div class="metric-label">广告营收</div>
-          <div class="metric-value large" id="val-adRevenue">-</div>
-          <div class="metric-change" id="change-adRevenue"></div>
-        </div>
-      </div>
-      <div class="metrics-grid cols-3 mt-sm">
-        <div class="metric-item">
-          <div class="metric-label">实收订单量</div>
-          <div class="metric-value large" id="val-orderCount">-</div>
-          <div class="metric-change" id="change-orderCount"></div>
-        </div>
-      </div>
+    <section class="card" data-card-section="revenue">
+      <div class="card-title">营收数据 <svg class="info-icon" data-edit="revenue" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
+      <div id="revenueMetrics"></div>
     </section>
 
-    <section class="card">
-      <div class="card-title">车辆数据 <span class="info-icon">&#9737;</span></div>
-      <div class="metrics-grid cols-3">
-        <div class="metric-item selectable selected" data-card="vehicle" data-metric="totalVehicles">
-          <div class="metric-label">运营车辆数</div>
-          <div class="metric-value" id="val-totalVehicles">-</div>
-        </div>
-        <div class="metric-item selectable" data-card="vehicle" data-metric="unavailableVehicles">
-          <div class="metric-label">不可用车辆数</div>
-          <div class="metric-value" id="val-unavailableVehicles">-</div>
-        </div>
-        <div class="metric-item selectable" data-card="vehicle" data-metric="noOrderVehicles">
-          <div class="metric-label">未产生订单车辆(3天)</div>
-          <div class="metric-value" id="val-noOrderVehicles">-</div>
-        </div>
-      </div>
-      <div class="detail-area" id="vehicleDetail"></div>
-    </section>
-
-    <section class="card">
-      <div class="card-title">运维数据 <span class="info-icon">&#9737;</span></div>
-      <div class="metrics-grid cols-3">
-        <div class="metric-item selectable selected" data-card="ops" data-metric="swapComplete">
-          <div class="metric-label">换电任务完成数</div>
-          <div class="metric-value" id="val-swapComplete">-</div>
-        </div>
-        <div class="metric-item selectable" data-card="ops" data-metric="dispatchVehicles">
-          <div class="metric-label">调度车辆数量</div>
-          <div class="metric-value" id="val-dispatchVehicles">-</div>
-        </div>
-        <div class="metric-item selectable" data-card="ops" data-metric="dispatchRate">
-          <div class="metric-label">12小时调度成单率</div>
-          <div class="metric-value" id="val-dispatchRate">-</div>
-        </div>
-      </div>
-      <div class="metrics-grid cols-3 mt-sm">
-        <div class="metric-item selectable" data-card="ops" data-metric="repairOrders">
-          <div class="metric-label">报修单数</div>
-          <div class="metric-value" id="val-repairOrders">-</div>
-        </div>
-        <div class="metric-item selectable" data-card="ops" data-metric="repairComplete">
-          <div class="metric-label">报修完成数</div>
-          <div class="metric-value" id="val-repairComplete">-</div>
-        </div>
-        <div class="metric-item selectable" data-card="ops" data-metric="lowBatteryVehicles">
-          <div class="metric-label">低电车辆数</div>
-          <div class="metric-value" id="val-lowBatteryVehicles">-</div>
-        </div>
-      </div>
+    <section class="card" data-card-section="ops">
+      <div class="card-title">运维数据 <svg class="info-icon" data-edit="ops" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
+      <div id="opsMetrics"></div>
       <div class="detail-area" id="opsDetail"></div>
     </section>
 
-    <section class="card">
-      <div class="card-title">订单数据 <span class="info-icon">&#9737;</span></div>
-      <div class="metrics-grid cols-3">
-        <div class="metric-item selectable" data-card="order" data-metric="avgPrice">
-          <div class="metric-label">均单价</div>
-          <div class="metric-value large" id="val-avgPrice">-</div>
-        </div>
-        <div class="metric-item selectable" data-card="order" data-metric="avgDuration">
-          <div class="metric-label">均单时长</div>
-          <div class="metric-value large" id="val-avgDuration">-</div>
-        </div>
-        <div class="metric-item selectable selected" data-card="order" data-metric="lostOrders">
-          <div class="metric-label">丢单次数</div>
-          <div class="metric-value large" id="val-lostOrders">-</div>
-        </div>
-      </div>
+    <section class="card" data-card-section="vehicle">
+      <div class="card-title">车辆数据 <svg class="info-icon" data-edit="vehicle" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
+      <div id="vehicleMetrics"></div>
+      <div class="detail-area" id="vehicleDetail"></div>
+    </section>
+
+    <section class="card" data-card-section="order">
+      <div class="card-title">订单数据 <svg class="info-icon" data-edit="order" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
+      <div id="orderMetrics"></div>
       <div class="detail-area" id="orderDetail"></div>
     </section>
 
+    <section class="card" data-card-section="user">
+      <div class="card-title">用户数据 <svg class="info-icon" data-edit="user" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg></div>
+      <div id="userMetrics"></div>
+    </section>
+
   </main>
+
+  </div><!-- end dashboardPage -->
+
+  <div id="modulePickerOverlay" class="module-picker-overlay">
+    <div class="module-picker-bg"></div>
+    <div class="module-picker-panel">
+      <div class="module-picker-header">
+        <div class="module-picker-title">为帮助您更好了解日报情况</div>
+        <div class="module-picker-subtitle">选择你日常常用的模块</div>
+        <span class="module-picker-close" id="modulePickerClose">&times;</span>
+      </div>
+      <div class="module-picker-list" id="modulePickerList"></div>
+      <div class="module-picker-footer">
+        <button class="module-picker-btn" id="modulePickerBtn">开启日报看板</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="fieldEditor" class="field-editor">
+    <div class="editor-header">
+      <span class="editor-back" id="editorBack"><svg width="10" height="18" viewBox="0 0 10 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 1L1 9l8 8"/></svg></span>
+      <span class="editor-title" id="editorTitle"></span>
+      <span class="editor-done" id="editorDone">完成</span>
+    </div>
+    <div class="editor-subheader">
+      <span>指标</span>
+      <span>排序</span>
+    </div>
+    <div class="editor-list" id="editorList"></div>
+  </div>
+
+  <div id="calendarOverlay" class="calendar-overlay">
+    <div class="calendar-mask"></div>
+    <div class="calendar-panel">
+      <div class="calendar-header">
+        <span class="calendar-title">选择日期</span>
+        <span class="calendar-close" id="calendarClose">&times;</span>
+      </div>
+      <div class="calendar-weekdays">
+        <span>日</span><span>一</span><span>二</span><span>三</span><span>四</span><span>五</span><span>六</span>
+      </div>
+      <div class="calendar-body" id="calendarBody"></div>
+    </div>
+  </div>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
   <script src="app.js"></script>
