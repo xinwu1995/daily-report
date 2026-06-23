@@ -441,7 +441,7 @@ var state = {
 
 var areaState = {
   open: false,
-  selectedDistrict: null,
+  selectedDistrict: 0,
   selectedGroup: null,
   selectedArea: null
 };
