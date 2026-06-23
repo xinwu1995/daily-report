@@ -61,6 +61,7 @@ var BASE = {
   battery20to30: 357,
   lostByLowBattery: 313,
   dispatchRates: [72, 82.5, 87, 90, 91.5, 92],
+  dispatchCounts: [180, 350, 520, 720, 900, 1077],
 
   avgPrice: 7.24,
   avgPriceWithFine: 8.12,
@@ -313,6 +314,15 @@ function generateDayData(dayIndex) {
     prevRate = rate;
   }
 
+  var dispatchCounts = [];
+  var prevCount = 0;
+  for (var dc = 0; dc < BASE.dispatchCounts.length; dc++) {
+    var cnt = vary(BASE.dispatchCounts[dc], dayIndex, fi++);
+    cnt = Math.max(prevCount + 10, cnt);
+    dispatchCounts.push(cnt);
+    prevCount = cnt;
+  }
+
   var avgPrice = varyDecimal(BASE.avgPrice, dayIndex, fi++, 2);
   var avgPriceWithFine = Math.max(avgPrice + 0.1, varyDecimal(BASE.avgPriceWithFine, dayIndex, fi++, 2));
   var avgPriceWithoutFine = Math.min(avgPrice - 0.1, varyDecimal(BASE.avgPriceWithoutFine, dayIndex, fi++, 2));
@@ -364,6 +374,7 @@ function generateDayData(dayIndex) {
     batteryAbove30: batteryAbove30,
     lostByLowBattery: lostByLowBattery,
     dispatchRates: dispatchRates,
+    dispatchCounts: dispatchCounts,
 
     avgPrice: avgPrice,
     avgPriceWithFine: avgPriceWithFine,
@@ -690,6 +701,38 @@ function initDispatchChart(data) {
   });
 }
 
+function initDispatchCountChart(data) {
+  var canvas = document.getElementById('dispatchCountCanvas');
+  if (!canvas) return;
+  opsChart = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: ['6h', '12h', '18h', '24h', '30h', '36h'],
+      datasets: [{
+        data: data.dispatchCounts,
+        backgroundColor: '#7EB1FB',
+        borderRadius: 3,
+        barPercentage: 0.65,
+        categoryPercentage: 0.8
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: false },
+        barValue: { display: true, suffix: '' }
+      },
+      scales: {
+        y: { beginAtZero: true, grid: { color: '#f3f4f6' }, ticks: { font: { size: 10 }, color: '#9ca3af' }, border: { display: false } },
+        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#9ca3af' }, border: { display: false } }
+      }
+    },
+    plugins: [barValuePlugin]
+  });
+}
+
 function renderRepairDetailHTML() {
   return '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch">'
     + '<div class="chart-container" style="height:260px;min-width:520px"><canvas id="repairBarCanvas"></canvas></div>'
@@ -890,7 +933,10 @@ function renderDetails(data) {
 
   if (state.selectedMetrics.ops === 'swapComplete') {
     opsEl.innerHTML = renderStaffTableHTML(data);
-  } else if (state.selectedMetrics.ops === 'dispatchVehicles' || state.selectedMetrics.ops === 'dispatchRate') {
+  } else if (state.selectedMetrics.ops === 'dispatchVehicles') {
+    opsEl.innerHTML = '<div class="chart-container" style="height:240px"><canvas id="dispatchCountCanvas"></canvas></div>';
+    initDispatchCountChart(data);
+  } else if (state.selectedMetrics.ops === 'dispatchRate') {
     opsEl.innerHTML = renderDispatchDetailHTML();
     initDispatchChart(data);
   } else if (state.selectedMetrics.ops === 'repairOrders' || state.selectedMetrics.ops === 'repairComplete') {
