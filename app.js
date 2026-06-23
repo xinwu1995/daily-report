@@ -1346,11 +1346,6 @@ function onDragStart(e) {
   dragState.dragIdx = idx;
   dragState.offsetY = clientY - rect.top;
   dragState.isTouch = isTouch;
-  dragState.itemPositions = [];
-  allItems.forEach(function(el) {
-    dragState.itemPositions.push(el.getBoundingClientRect());
-  });
-
   var edItem = editorState.items[idx];
   var checkSvg = edItem.checked
     ? '<svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="#ff6b35" stroke="none"/><path d="M6 11l3.5 3.5L16 8" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>'
@@ -1385,32 +1380,34 @@ function onDragMove(e) {
   var newTop = clientY - dragState.offsetY;
   dragState.clone.style.top = newTop + 'px';
 
-  var itemH = dragState.itemPositions[0].height;
-  var centerY = newTop + itemH / 2;
+  var list = document.getElementById('editorList');
+  var allItems = list.querySelectorAll('.editor-item');
+  if (allItems.length === 0) return;
+
+  var draggedNode = allItems[dragState.dragIdx];
+  var centerY = newTop + draggedNode.offsetHeight / 2;
 
   var targetIdx = dragState.dragIdx;
-  for (var i = 0; i < dragState.itemPositions.length; i++) {
-    var midY = dragState.itemPositions[i].top + dragState.itemPositions[i].height / 2;
+  for (var i = 0; i < allItems.length; i++) {
+    var rect = allItems[i].getBoundingClientRect();
+    var midY = rect.top + rect.height / 2;
     if (centerY < midY) {
       targetIdx = i;
       break;
     }
-    if (i === dragState.itemPositions.length - 1) targetIdx = i;
+    if (i === allItems.length - 1) targetIdx = i;
   }
 
   if (targetIdx !== dragState.dragIdx) {
+    var refNode = allItems[targetIdx];
+    if (targetIdx > dragState.dragIdx) {
+      list.insertBefore(draggedNode, refNode.nextSibling);
+    } else {
+      list.insertBefore(draggedNode, refNode);
+    }
     var moved = editorState.items.splice(dragState.dragIdx, 1)[0];
     editorState.items.splice(targetIdx, 0, moved);
     dragState.dragIdx = targetIdx;
-    renderEditorList();
-
-    var list = document.getElementById('editorList');
-    var allItems = list.querySelectorAll('.editor-item');
-    dragState.itemPositions = [];
-    allItems.forEach(function(el) {
-      dragState.itemPositions.push(el.getBoundingClientRect());
-    });
-    allItems[targetIdx].style.opacity = '0.2';
   }
 }
 
@@ -1659,11 +1656,6 @@ function onModuleDragStart(e) {
   moduleDragState.dragIdx = idx;
   moduleDragState.offsetY = clientY - rect.top;
   moduleDragState.isTouch = isTouch;
-  moduleDragState.itemPositions = [];
-  allItems.forEach(function(el) {
-    moduleDragState.itemPositions.push(el.getBoundingClientRect());
-  });
-
   var m = modulePickerState[idx];
   var clone = document.createElement('div');
   clone.innerHTML = '<div style="flex-shrink:0;width:22px;height:22px;display:flex;align-items:center;justify-content:center">'
@@ -1700,32 +1692,34 @@ function onModuleDragMove(e) {
   var newTop = clientY - moduleDragState.offsetY;
   moduleDragState.clone.style.top = newTop + 'px';
 
-  var itemH = moduleDragState.itemPositions[0].height;
-  var centerY = newTop + itemH / 2;
+  var list = document.getElementById('modulePickerList');
+  var allItems = list.querySelectorAll('.module-picker-item');
+  if (allItems.length === 0) return;
+
+  var draggedNode = allItems[moduleDragState.dragIdx];
+  var centerY = newTop + draggedNode.offsetHeight / 2;
 
   var targetIdx = moduleDragState.dragIdx;
-  for (var i = 0; i < moduleDragState.itemPositions.length; i++) {
-    var midY = moduleDragState.itemPositions[i].top + moduleDragState.itemPositions[i].height / 2;
+  for (var i = 0; i < allItems.length; i++) {
+    var rect = allItems[i].getBoundingClientRect();
+    var midY = rect.top + rect.height / 2;
     if (centerY < midY) {
       targetIdx = i;
       break;
     }
-    if (i === moduleDragState.itemPositions.length - 1) targetIdx = i;
+    if (i === allItems.length - 1) targetIdx = i;
   }
 
   if (targetIdx !== moduleDragState.dragIdx) {
+    var refNode = allItems[targetIdx];
+    if (targetIdx > moduleDragState.dragIdx) {
+      list.insertBefore(draggedNode, refNode.nextSibling);
+    } else {
+      list.insertBefore(draggedNode, refNode);
+    }
     var moved = modulePickerState.splice(moduleDragState.dragIdx, 1)[0];
     modulePickerState.splice(targetIdx, 0, moved);
     moduleDragState.dragIdx = targetIdx;
-    renderModulePicker();
-
-    var list = document.getElementById('modulePickerList');
-    var allItems = list.querySelectorAll('.module-picker-item');
-    moduleDragState.itemPositions = [];
-    allItems.forEach(function(el) {
-      moduleDragState.itemPositions.push(el.getBoundingClientRect());
-    });
-    allItems[targetIdx].style.opacity = '0.2';
   }
 }
 
