@@ -188,6 +188,7 @@ body {
   padding-top: 0;
   padding-bottom: 0;
   border-color: transparent;
+  overflow: hidden;
 }
 
 .week-selector::-webkit-scrollbar {
