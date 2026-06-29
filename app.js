@@ -1791,6 +1791,214 @@ function onModuleDragEnd() {
   renderModulePicker();
 }
 
+// ==================== 区域/日期对比 ====================
+
+var COMPARE_SECTIONS = [
+  {
+    key: 'highlight', name: '重点关注数据',
+    metrics: [
+      { key: 'orderCount', label: '实收订单量', info: true },
+      { key: 'dispatchRate', label: '12小时调度成单率', format: 'percent', info: true },
+      { key: 'availableVehicles', label: '可用车辆', info: true },
+      { key: 'confiscatedVehicles', label: '扣押车辆', info: true },
+      { key: 'lowBatteryVehicles', label: '低电车辆', info: true },
+      { key: 'faultVehicles', label: '故障车辆', info: true }
+    ]
+  },
+  {
+    key: 'vehicle', name: '车辆数据',
+    metrics: [
+      { key: 'totalVehicles', label: '运营车辆数' },
+      { key: 'availableVehicles', label: '可用车辆数' },
+      { key: 'unavailableVehicles', label: '不可用车辆数' },
+      { key: 'noOrderVehicles', label: '未产生订单车辆' },
+      { key: 'availableRate', label: '车辆可用率', format: 'percent' },
+      { key: 'ridingRate', label: '车辆被骑行率', format: 'percent' }
+    ]
+  },
+  {
+    key: 'orderOverview', name: '订单大盘数据',
+    metrics: [
+      { key: 'revenue', label: '实收订单金额' },
+      { key: 'orderCount', label: '实收订单量' },
+      { key: 'avgPrice', label: '均单价', format: 'decimal' },
+      { key: 'avgDuration', label: '均单时长(分钟)' },
+      { key: 'lostOrders', label: '丢单次数' }
+    ]
+  },
+  {
+    key: 'ops', name: '运维数据',
+    metrics: [
+      { key: 'swapComplete', label: '换电完成数' },
+      { key: 'dispatchVehicles', label: '调度车辆数' },
+      { key: 'dispatchRate', label: '12小时调度成单率', format: 'percent' },
+      { key: 'repairOrders', label: '报修单数' },
+      { key: 'repairComplete', label: '报修完成数' }
+    ]
+  },
+  {
+    key: 'userOrder', name: '用户维度订单数据',
+    metrics: [
+      { key: 'fineOrderCount', label: '调度费/罚金订单数' },
+      { key: 'fineOrderAmount', label: '调度费/罚金金额' },
+      { key: 'disputeCount', label: '异议工单数' },
+      { key: 'disputeRefund', label: '异议退款金额' },
+      { key: 'rideCardDeduct', label: '骑行卡抵扣次数' },
+      { key: 'couponDeduct', label: '优惠卡抵扣次数' }
+    ]
+  },
+  {
+    key: 'userAttr', name: '用户属性数据',
+    metrics: [
+      { key: 'inactiveUsers', label: '>3天未骑行用户数' },
+      { key: 'frequentUsers', label: '近7天骑行≧4次' },
+      { key: 'totalRideUsers', label: '累计骑行用户数' },
+      { key: 'newBindUsers', label: '新增绑定用户数' },
+      { key: 'newUserRetention', label: '新用户7日留存率', format: 'percent' }
+    ]
+  }
+];
+
+var DISTRICT_WEATHERS = [
+  { weather: '毛毛雨', temp: '28℃' },
+  { weather: '毛毛雨', temp: '28℃' },
+  { weather: '毛毛雨', temp: '28℃' },
+  { weather: '毛毛雨', temp: '28℃' }
+];
+
+var compareState = {
+  open: false,
+  selectedAreas: [0, 1, 2, 3],
+  expandedSections: { highlight: true }
+};
+
+var compareDataCache = {};
+
+function generateCompareDataForDistrict(districtIdx) {
+  var cacheKey = districtIdx + '_' + state.currentDay;
+  if (compareDataCache[cacheKey]) return compareDataCache[cacheKey];
+  var seed = districtIdx * 37 + state.currentDay + 7;
+  var data = generateDayData(seed);
+  data.confiscatedVehicles = data.unavailableBreakdown[7];
+  data.faultVehicles = data.unavailableBreakdown[3];
+  if (districtIdx === 3) data.confiscatedVehicles = null;
+  compareDataCache[cacheKey] = data;
+  return data;
+}
+
+function formatCompareVal(value, format) {
+  if (value == null) return '--';
+  if (format === 'percent') return (value % 1 === 0 ? value : value.toFixed(1)) + '%';
+  if (format === 'decimal') return value.toFixed(2);
+  return formatNumber(value);
+}
+
+function renderComparePage() {
+  var areas = compareState.selectedAreas;
+  var labelW = 96, cellW = 88, addW = 40;
+  var totalW = labelW + areas.length * cellW + addW;
+
+  var html = '<div class="compare-inner" style="min-width:' + totalW + 'px">';
+
+  html += '<div class="compare-area-row">';
+  html += '<div class="compare-label-cell"><span class="compare-area-label-text">服务区</span><span class="compare-swap-icon">⇌</span></div>';
+  for (var i = 0; i < areas.length; i++) {
+    var d = CITY_DATA.districts[areas[i]];
+    var w = DISTRICT_WEATHERS[areas[i] % DISTRICT_WEATHERS.length];
+    html += '<div class="compare-area-cell">'
+      + '<div class="compare-area-pin"><span class="compare-pin-text">钉在左侧</span><span class="compare-area-remove" data-remove-area="' + i + '">×</span></div>'
+      + '<div class="compare-area-name">' + d.name + '</div>'
+      + '<div class="compare-area-weather">' + w.weather + '</div>'
+      + '<div class="compare-area-temp">' + w.temp + '</div>'
+      + '</div>';
+  }
+  html += '<div class="compare-add-cell" id="compareAddBtn">+</div>';
+  html += '</div>';
+
+  for (var s = 0; s < COMPARE_SECTIONS.length; s++) {
+    var section = COMPARE_SECTIONS[s];
+    var expanded = !!compareState.expandedSections[section.key];
+
+    html += '<div class="compare-section-header" data-compare-section="' + section.key + '">'
+      + '<span>' + section.name + '</span>'
+      + '<span class="compare-arrow">' + (expanded ? '▼' : '▲') + '</span>'
+      + '</div>';
+
+    if (expanded) {
+      var rowW = labelW + areas.length * cellW;
+      for (var m = 0; m < section.metrics.length; m++) {
+        var metric = section.metrics[m];
+        html += '<div class="compare-data-row" style="min-width:' + rowW + 'px">';
+        html += '<div class="compare-label-cell">'
+          + metric.label
+          + (metric.info ? ' <span class="compare-info-icon">ⓘ</span>' : '')
+          + '</div>';
+        for (var a = 0; a < areas.length; a++) {
+          var data = generateCompareDataForDistrict(areas[a]);
+          var val = data[metric.key];
+          var cls = val == null ? ' na' : '';
+          html += '<div class="compare-data-cell' + cls + '">' + formatCompareVal(val, metric.format) + '</div>';
+        }
+        html += '</div>';
+      }
+    }
+  }
+
+  html += '</div>';
+  document.getElementById('compareContent').innerHTML = html;
+}
+
+function openComparePage() {
+  compareState.open = true;
+  compareDataCache = {};
+  renderComparePage();
+  document.getElementById('dashboardPage').style.display = 'none';
+  document.getElementById('comparePage').classList.add('open');
+}
+
+function closeComparePage() {
+  compareState.open = false;
+  document.getElementById('comparePage').classList.remove('open');
+  document.getElementById('dashboardPage').style.display = '';
+}
+
+function toggleCompareSection(sectionKey) {
+  compareState.expandedSections[sectionKey] = !compareState.expandedSections[sectionKey];
+  renderComparePage();
+}
+
+function removeCompareArea(index) {
+  if (compareState.selectedAreas.length <= 1) return;
+  compareState.selectedAreas.splice(index, 1);
+  renderComparePage();
+}
+
+function addCompareArea(districtIdx) {
+  if (compareState.selectedAreas.indexOf(districtIdx) >= 0) return;
+  compareState.selectedAreas.push(districtIdx);
+  hideCompareAddPicker();
+  renderComparePage();
+}
+
+function showCompareAddPicker() {
+  var html = '<div class="compare-add-title">选择服务区</div>';
+  for (var i = 0; i < CITY_DATA.districts.length; i++) {
+    var inList = compareState.selectedAreas.indexOf(i) >= 0;
+    html += '<div class="compare-add-item' + (inList ? ' disabled' : '') + '" data-add-district="' + i + '">'
+      + '<span>' + CITY_DATA.districts[i].name + '</span>'
+      + (inList ? '<span class="compare-add-check">✓</span>' : '')
+      + '</div>';
+  }
+  document.getElementById('compareAddPanel').innerHTML = html;
+  document.getElementById('compareAddOverlay').classList.add('open');
+  document.getElementById('compareAddPanel').classList.add('open');
+}
+
+function hideCompareAddPicker() {
+  document.getElementById('compareAddOverlay').classList.remove('open');
+  document.getElementById('compareAddPanel').classList.remove('open');
+}
+
 // ==================== 事件绑定 ====================
 
 // ==================== 区域选择器 ====================
@@ -1923,6 +2131,33 @@ function setupEvents() {
     showModulePicker();
   });
 
+  document.getElementById('pkBtn').addEventListener('click', openComparePage);
+  document.getElementById('compareBack').addEventListener('click', closeComparePage);
+  document.getElementById('compareContent').addEventListener('click', function(e) {
+    var sectionHeader = e.target.closest('.compare-section-header');
+    if (sectionHeader) {
+      toggleCompareSection(sectionHeader.getAttribute('data-compare-section'));
+      return;
+    }
+    var removeBtn = e.target.closest('.compare-area-remove');
+    if (removeBtn) {
+      removeCompareArea(parseInt(removeBtn.getAttribute('data-remove-area')));
+      return;
+    }
+    var addBtn = e.target.closest('.compare-add-cell');
+    if (addBtn) {
+      showCompareAddPicker();
+      return;
+    }
+  });
+  document.getElementById('compareAddOverlay').addEventListener('click', hideCompareAddPicker);
+  document.getElementById('compareAddPanel').addEventListener('click', function(e) {
+    var item = e.target.closest('.compare-add-item');
+    if (item && !item.classList.contains('disabled')) {
+      addCompareArea(parseInt(item.getAttribute('data-add-district')));
+    }
+  });
+
   document.getElementById('weekSelector').addEventListener('click', function (e) {
     if (e.target.closest('.calendar-btn')) {
       openCalendar();
@@ -2052,7 +2287,12 @@ document.addEventListener('DOMContentLoaded', function () {
   setupEvents();
 
   document.getElementById('landingDailyReport').addEventListener('click', function() {
-    enterDashboard();
-    showModulePicker();
+    if (window.location.search.indexOf('v=2') >= 0) {
+      document.getElementById('landingPage').style.display = 'none';
+      openComparePage();
+    } else {
+      enterDashboard();
+      showModulePicker();
+    }
   });
 });

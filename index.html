@@ -21,6 +21,10 @@
         <span class="city-name">武昌区</span>
         <span class="dropdown-arrow">&#8964;</span>
       </div>
+      <button class="pk-btn" id="pkBtn">
+        <span class="pk-text">PK</span>
+        <span class="pk-subtext">区域/日期对比</span>
+      </button>
       <button class="settings-btn" aria-label="设置">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="12" r="3"/>
@@ -96,6 +100,22 @@
       <span>排序</span>
     </div>
     <div class="editor-list" id="editorList"></div>
+  </div>
+
+  <div id="comparePage" class="compare-page">
+    <div class="compare-header">
+      <span class="compare-back" id="compareBack"><svg width="10" height="18" viewBox="0 0 10 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 1L1 9l8 8"/></svg></span>
+      <span class="compare-title">管理日报</span>
+      <button class="compare-settings-btn" aria-label="设置">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+    <div class="compare-content" id="compareContent"></div>
+    <div class="compare-add-overlay" id="compareAddOverlay"></div>
+    <div class="compare-add-panel" id="compareAddPanel"></div>
   </div>
 
   <div id="calendarOverlay" class="calendar-overlay">
